@@ -88,7 +88,7 @@ services:
     ports:
       - 3001:3001
     environment:
-      DB_URL: mongodb://db/vidly
+      DB_URL: mongodb://db/db_data
     command: ./docker-entrypoint.sh
 
   db:
@@ -96,10 +96,10 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - vidly:/data/db
+      - db_data:/data/db
 
 volumes:
-  vidly:
+  db_data:
 ```
 
 > > This Docker Compose file defines a multi-container application with frontend, backend, and database services. It uses version 3.8 of the Docker Compose file format and includes the following services:
@@ -119,10 +119,10 @@ volumes:
 > > Database Service (db):
 > > Uses the official MongoDB image version 4.0-xenial.
 > > Maps port 27017 on the host to port 27017 in the container.
-> > Defines a volume named "vidly" to persist MongoDB data.
+> > Defines a volume named "db_data" to persist MongoDB data.
 
 > > Volumes:
-> > Defines a volume named "vidly" to persist data for the MongoDB container between restarts.
+> > Defines a volume named "db_data" to persist data for the MongoDB container between restarts.
 > > This configuration indicates a setup where the frontend communicates with the backend, and the backend uses MongoDB as its database. The "depends_on" ensures that services start in the specified order, with the "db" service starting before the "backend" service.
 
 ## What is a Dockerfile
