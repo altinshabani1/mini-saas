@@ -6,7 +6,7 @@ on:
 
     branches: [ "main" ]
 
-     tags:
+    tags:
 
        - 'v*'  # Trigger for version tags like v1.0.0
 
@@ -28,19 +28,19 @@ jobs:
  
     - name: Log in to GitHub Container Registry
 
-      run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u cloudbench1 --password-stdin
+      run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
  
     - name: Build Docker Image
 
       run: |
 
-        IMAGE_TAG="ghcr.io/cloudbench1/simplenodeapp:${{ github.sha }}"
+        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
 
         # Check if this is a tag push (e.g., v1.0.0)
 
         if [ "${{ github.ref_type }}" = "tag" ]; then
 
-          VERSION_TAG="ghcr.io/cloudbench1/simplenodeapp:${{ github.ref_name }}"
+          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
 
           docker build . --tag $IMAGE_TAG --tag $VERSION_TAG
 
@@ -54,7 +54,7 @@ jobs:
 
       run: |
 
-        IMAGE_TAG="ghcr.io/altinshabani1/simplenodeapp:${{ github.sha }}"
+        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
 
         # Push the SHA-tagged image
 
@@ -64,7 +64,7 @@ jobs:
 
         if [ "${{ github.ref_type }}" = "tag" ]; then
 
-          VERSION_TAG="ghcr.io/altinshabani1/simplenodeapp:${{ github.ref_name }}"
+          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
 
           docker push $VERSION_TAG
 
