@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Waiting for MongoDB to start..."
-/app/wait-for db:27017
+/usr/local/bin/wait-for.sh db:27017
 
 echo "Migrating the database..."
 npm run db:up
