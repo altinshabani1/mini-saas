@@ -43,6 +43,9 @@ jobs:
       if: success()
       uses: appleboy/ssh-action@v1.0.0
       with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           if ! command -v docker &> /dev/null; then
           echo "Docker not found, installing..."
@@ -51,10 +54,6 @@ jobs:
           sudo systemctl start docker
           sudo usermod -aG docker $USER
           fi
-
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           docker login ghcr.io -u altinshabani1 -p ${{ secrets.GH_PAT }}
           docker pull ghcr.io/altinshabani1/mini-saas:${{ github.sha }}
