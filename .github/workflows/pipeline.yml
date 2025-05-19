@@ -4,52 +4,66 @@ on:
   push:
     branches: [ "main" ]
     tags:
-      - 'v*'  # Trigger for version tags like v1.0.0
-    # pull_request:
-    #   branches: [ "main" ]
+      - 'v*'  # Trigger on version tags like v1.0.0
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
 
-      - name: Build Docker Image
-        run: |
-          IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
+    - name: Build Docker Image
+      run: |
+        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
 
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
-            docker build -f frontend/Dockerfile frontend --tag $IMAGE_TAG --tag $VERSION_TAG
-          else
-            docker build -f frontend/Dockerfile frontend --tag $IMAGE_TAG
-          fi
+        # Check if this is a tag push (e.g., v1.0.0)
+        if [ "${{ github.ref_type }}" = "tag" ]; then
+          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
+          docker build ./frontend --tag $IMAGE_TAG --tag $VERSION_TAG
+        else
+          docker build ./frontend --tag $IMAGE_TAG
+        fi
 
-      - name: Push Docker Image
-        run: |
-          IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
+    - name: Push Docker Image
+      run: |
+        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
+        docker push $IMAGE_TAG
 
-          docker push $IMAGE_TAG
+        if [ "${{ github.ref_type }}" = "tag" ]; then
+          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
+          docker push $VERSION_TAG
+        fi
 
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
-            docker push $VERSION_TAG
-          fi
+    - name: Deploy to Ubuntu Server via SSH
+      if: success()
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker login ghcr.io -u altinshabani1 -p ${{ secrets.GH_PAT }}
+          docker pull ghcr.io/altinshabani1/mini-saas:${{ github.sha }}
 
-      - name: Notify via Email on Success
-        if: success()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "Docker Build Success - MiniSaaS"
-          to: "enisimami@gmail.com"
-          from: "GitHub Actions"
-          body: "The Docker image for MiniSaaS has been successfully built and pushed to GitHub Packages."
+          docker stop mini-saas || true
+          docker rm mini-saas || true
+
+          docker run -d --name mini-saas -p 80:3000 ghcr.io/altinshabani1/mini-saas:${{ github.sha }}
+
+    - name: Notify via Email on Success
+      if: success()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Docker Build & Deploy Success - Mini SaaS"
+        to: "enisimami@gmail.com"
+        from: "GitHub Actions"
+        body: "The Docker image for Mini SaaS has been built, pushed, and deployed to the Ubuntu server successfully."
