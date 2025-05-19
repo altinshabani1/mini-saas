@@ -1,41 +1,3 @@
-name: Docker Image CI
-
-on:
-  push:
-    branches: [ "main" ]
-    tags:
-      - 'v*'
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
-    - name: Log in to GitHub Container Registry
-      run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
-
-    - name: Build Docker Image
-      run: |
-        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
-        if [ "${{ github.ref_type }}" = "tag" ]; then
-          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
-          docker build ./frontend --tag $IMAGE_TAG --tag $VERSION_TAG
-        else
-          docker build ./frontend --tag $IMAGE_TAG
-        fi
-
-    - name: Push Docker Image
-      run: |
-        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
-        docker push $IMAGE_TAG
-        if [ "${{ github.ref_type }}" = "tag" ]; then
-          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
-          docker push $VERSION_TAG
-        fi
-
     - name: Deploy to Remote Server
       uses: appleboy/ssh-action@v1
       with:
@@ -55,24 +17,10 @@ jobs:
             sudo apt-get install -y docker-ce docker-ce-cli containerd.io
           fi
 
-          echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
+          echo "${{ secrets.GH_PAT }}" | sudo docker login ghcr.io -u altinshabani1 --password-stdin
 
           IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
-          docker pull $IMAGE_TAG
-          docker stop mini-saas || true
-          docker rm mini-saas || true
-          docker run -d --name mini-saas -p 80:3000 $IMAGE_TAG
-
-    - name: Notify via Email on Success
-      if: success()
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.gmail.com
-        server_port: 587
-        username: ${{ secrets.EMAIL_USERNAME }}
-        password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "✅ Mini-SaaS Deploy Successful"
-        to: enisimami@gmail.com
-        from: GitHub Actions
-        body: |
-          Mini-SaaS Docker container was deployed to the remote server successfully.
+          sudo docker pull $IMAGE_TAG
+          sudo docker stop mini-saas || true
+          sudo docker rm mini-saas || true
+          sudo docker run -d --name mini-saas -p 80:3000 $IMAGE_TAG
