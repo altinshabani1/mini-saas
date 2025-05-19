@@ -1,4 +1,9 @@
-![Docker CI](https://github.com/altinshabani1/mini-saas/actions/workflows/docker-image.yml/badge.svg)
+# Mini SaaS
+
+![Build Status](https://github.com/altinshabani1/mini-saas/actions/workflows/docker-image.yml/badge.svg)
+
+A simple SaaS application deployed via Docker and GitHub Actions.
+
 
 
 # Docker-Compose || Full-Stack Nodejs Application
