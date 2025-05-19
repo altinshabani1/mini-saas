@@ -1,3 +1,6 @@
+![Docker CI](https://github.com/altinshabani1/mini-saas/actions/workflows/docker-image.yml/badge.svg)
+
+
 # Docker-Compose || Full-Stack Nodejs Application
 
 ![Docker_Compose](./img/1.png)
