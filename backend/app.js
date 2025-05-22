@@ -4,14 +4,14 @@ const homeRoutes = require("./routes/index");
 const movieRoutes = require("./routes/movies");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Health check route
+// Health check
 app.get("/api/health", (req, res) => {
-    res.status(200).send("OK");
-  });
-
+  res.status(200).send("OK");
+});
 
 app.use("/api/", homeRoutes);
 app.use("/api/movies", movieRoutes);

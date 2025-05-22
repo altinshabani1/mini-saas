@@ -1,27 +1,30 @@
 FROM node:14.16.0-alpine3.13
 
-RUN addgroup app && adduser -S -G app app
+# Create app user and group
+RUN addgroup -S app && adduser -S -G app app
 
+# Set working directory
 WORKDIR /app
 
+# Copy package files and install dependencies
 COPY package*.json ./
-
 RUN npm install
 
+# Copy the rest of the app
 COPY . .
 
-
+# Ensure the app folder is owned by the non-root user
 RUN chown -R app:app /app
 
-RUN chmod +x /app/docker-entrypoint.sh
+# Ensure entrypoint and wait-for scripts are executable
+RUN chmod +x /app/docker-entrypoint.sh /app/wait-for.sh
 
-RUN chmod +x /app/wait-for.sh
-
-
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-
+# Use non-root user
 USER app
 
+# Expose the backend port
 EXPOSE 8000
 
-CMD []
+# Set default entrypoint and CMD
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["npm", "start"]

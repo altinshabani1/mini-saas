@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
+require('dotenv').config(); // Load environment variables
+const app = require("./app");
 
-router.get("/", (req, res) => {
-  res.send("<h1>Api is running!</h1>");
+const PORT = process.env.PORT || 8000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-module.exports = router;

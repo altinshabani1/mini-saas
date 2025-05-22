@@ -1,15 +1,22 @@
-const mongoose = require("mongoose");
+const { Pool } = require('pg');
+require('dotenv').config();
 
-const dbUrl = process.env.DB_URL || "mongodb://localhost/db_data";
+// Fallback connection string if env var is missing (adjust this to your Docker setup)
+const connectionString =
+  process.env.DB_URL ||
+  "postgresql://minisaas:12345678@postgres-db:5432/postdb";
 
-const connect = async () => {
-  await mongoose.connect(dbUrl, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  });
-  console.log("Connected to MongoDB: " + dbUrl);
+const pool = new Pool({ connectionString });
+
+pool.on('connect', () => {
+  console.log('✅ Connected to PostgreSQL');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
+module.exports = {
+  query: (text, params) => pool.query(text, params),
 };
-
-const close = () => mongoose.connection.close();
-
-module.exports = { connect, close, url: dbUrl };
