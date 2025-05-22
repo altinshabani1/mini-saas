@@ -86,7 +86,7 @@ services:
       - db
     build: ./backend
     ports:
-      - 3001:3001
+      - 8000:8000
     environment:
       DB_URL: mongodb://db/db_data
     command: ./docker-entrypoint.sh
@@ -112,7 +112,7 @@ volumes:
 > > Backend Service:
 > > Depends on the "db" service.
 > > Builds the backend from the "./backend" directory.
-> > Maps port 3001 on the host to port 3001 in the container.
+> > Maps port 8000 on the host to port 8000 in the container.
 > > Sets the environment variable DB_URL with the MongoDB connection string.
 > > Specifies the command to run the ./docker-entrypoint.sh script.
 
@@ -153,7 +153,7 @@ COPY . .
 RUN chown -R app:app /app && chmod +x /app/docker-entrypoint.sh
 
 # Expose the application port
-EXPOSE 3001
+EXPOSE 8000
 
 # Switch to the app user
 USER app

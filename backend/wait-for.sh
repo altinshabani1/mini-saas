@@ -1,13 +1,23 @@
 #!/bin/sh
 # wait-for.sh
 
-host="$1"
-shift
-cmd="$@"
+set -e
 
-until nc -z "$host" 27017; do
-  echo "Waiting for $host:27017..."
+HOST_PORT="$1"
+shift || true
+
+# Skip '--' if present
+[ "$1" = "--" ] && shift
+
+HOST=$(echo "$HOST_PORT" | cut -d: -f1)
+PORT=$(echo "$HOST_PORT" | cut -d: -f2)
+
+echo "Waiting for $HOST:$PORT..."
+
+while ! nc -z "$HOST" "$PORT"; do
   sleep 1
 done
 
-exec $cmd
+echo "$HOST:$PORT is available ✅"
+
+exec "$@"

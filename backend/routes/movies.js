@@ -1,35 +1,31 @@
 const express = require("express");
-const validateId = require("../middleware/validateId");
+const router = express.Router();
 const Movie = require("../models/movie");
 
-const router = express.Router();
-
+// Get all movies
 router.get("/", async (req, res) => {
-  const movies = await Movie.find().sort("title");
-  res.send(movies);
+  try {
+    const movies = await Movie.getAll();
+    res.json(movies);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get("/:id", validateId, async (req, res) => {
-  const movie = await Movie.findById(req.params.id);
-  if (!movie) return res.status(404).send();
-  res.send(movie);
-});
-
+// Create a new movie
 router.post("/", async (req, res) => {
-  if (!req.body.title) return res.status(400).send("Title is required.");
+  try {
+    const { title, director } = req.body;
 
-  const movie = new Movie({ title: req.body.title });
-  await movie.save();
-  res.status(201).send(movie);
-});
+    if (!title || !director) {
+      return res.status(400).json({ error: "Title and director are required." });
+    }
 
-router.delete("/:id", async (req, res) => {
-  const movie = await Movie.findByIdAndDelete(req.params.id);
-
-  if (!movie)
-    return res.status(404).send("The movie with the given ID was not found.");
-
-  res.status(204).send();
+    const movie = await Movie.create({ title, director });
+    res.status(201).json(movie);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
