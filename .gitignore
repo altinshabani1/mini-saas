@@ -15,3 +15,5 @@ npm-debug.log*
 # Build folders
 dist/
 build/
+
+backend/node_modules/
