@@ -69,7 +69,8 @@ services:
     command:
       - '--path.rootfs=/host'
     volumes:
-      - /:/host:ro,rslave
+     - /:/host:ro
+
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
