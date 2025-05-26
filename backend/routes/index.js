@@ -1,8 +1,12 @@
-require('dotenv').config(); // Load environment variables
-const app = require("./app");
+const express = require("express");
+const moviesRouter = require("./movies");
+const router = express.Router();
 
-const PORT = process.env.PORT || 8000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Example route at /api/
+router.get("/", (req, res) => {
+  res.send("Welcome to the Mini-Saas API!");
 });
+
+router.use("/movies", moviesRouter);
+
+module.exports = router;

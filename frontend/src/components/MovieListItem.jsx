@@ -1,7 +1,7 @@
 import React from "react";
 import "./MovieListItem.css";
 
-function Movie({ movie, onDeleteMovie }) {
+function MovieListItem({ movie, onDeleteMovie }) {
   return (
     <li className="MovieListItem">
       {movie.title}
@@ -12,4 +12,4 @@ function Movie({ movie, onDeleteMovie }) {
   );
 }
 
-export default Movie;
+export default MovieListItem;

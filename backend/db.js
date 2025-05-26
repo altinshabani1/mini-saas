@@ -1,10 +1,8 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Fallback connection string if env var is missing (adjust this to your Docker setup)
 const connectionString =
-  process.env.DB_URL ||
-  "postgresql://minisaas:12345678@postgres-db:5432/postdb";
+  process.env.DATABASE_URL || "postgresql://minisaas:12345678@postgres:5432/minisaas";
 
 const pool = new Pool({ connectionString });
 

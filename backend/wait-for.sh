@@ -1,5 +1,4 @@
 #!/bin/sh
-# wait-for.sh
 
 set -e
 

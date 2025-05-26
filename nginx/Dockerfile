@@ -1,11 +1,11 @@
 FROM nginx:latest
 
-# Copy custom Nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+# Install curl and netcat-openbsd (instead of virtual "netcat")
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
-# Copy the wait script
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY wait-for-backend.sh /wait-for-backend.sh
+
 RUN chmod +x /wait-for-backend.sh
 
-# Run the wait script when the container starts
 CMD ["/wait-for-backend.sh"]

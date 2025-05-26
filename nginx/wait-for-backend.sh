@@ -1,12 +1,11 @@
 #!/bin/sh
 
-echo "⏳ Waiting for the backend service to be ready..."
+echo "Waiting for backend..."
 
-# Keep checking until backend responds
-until curl -s http://backend:8000/health > /dev/null; do
-  echo "Backend not ready yet. Retrying in 3 seconds..."
+until curl -s http://backend:8000/health; do
+  echo "Backend not ready. Sleeping..."
   sleep 3
 done
 
-echo "✅ Backend is up! Starting Nginx..."
-exec nginx -g "daemon off;"
+echo "Backend is up. Starting Nginx..."
+nginx -g 'daemon off;'
