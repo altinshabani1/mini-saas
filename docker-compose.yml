@@ -22,9 +22,9 @@ services:
     container_name: postgres-db
     restart: always
     environment:
-      POSTGRES_USER: minisaas
-      POSTGRES_PASSWORD: 12345678
-      POSTGRES_DB: postdb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
