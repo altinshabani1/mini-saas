@@ -17,26 +17,16 @@ jobs:
     - name: Log in to GitHub Container Registry
       run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
 
-    - name: Build Docker Image
+    - name: Build Docker image
       run: |
-        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
-        if [ "${{ github.ref_type }}" = "tag" ]; then
-          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
-          docker build ./frontend --tag $IMAGE_TAG --tag $VERSION_TAG
-        else
-          docker build ./frontend --tag $IMAGE_TAG --tag ghcr.io/altinshabani1/mini-saas:latest
-        fi
+        IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/mini-saas:${{ github.sha }}"
+        docker build ./frontend --tag $IMAGE_TAG
+        echo "Built image: $IMAGE_TAG"
 
-    - name: Push Docker Image
+    - name: Push Docker image
       run: |
-        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
+        IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/mini-saas:${{ github.sha }}"
         docker push $IMAGE_TAG
-        if [ "${{ github.ref_type }}" = "tag" ]; then
-          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
-          docker push $VERSION_TAG
-        else
-          docker push ghcr.io/altinshabani1/mini-saas:latest
-        fi
 
     - name: Deploy to Remote Server
       uses: appleboy/ssh-action@v1
