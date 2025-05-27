@@ -17,11 +17,26 @@ jobs:
     - name: Log in to GitHub Container Registry
       run: echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u altinshabani1 --password-stdin
 
-    - name: Set up Docker Compose
-      run: docker compose version
-    
-    - name: Build and start services
-      run: docker compose up -d --build
+    - name: Build Docker Image
+      run: |
+        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
+        if [ "${{ github.ref_type }}" = "tag" ]; then
+          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
+          docker build ./frontend --tag $IMAGE_TAG --tag $VERSION_TAG
+        else
+          docker build ./frontend --tag $IMAGE_TAG --tag ghcr.io/altinshabani1/mini-saas:latest
+        fi
+
+    - name: Push Docker Image
+      run: |
+        IMAGE_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.sha }}"
+        docker push $IMAGE_TAG
+        if [ "${{ github.ref_type }}" = "tag" ]; then
+          VERSION_TAG="ghcr.io/altinshabani1/mini-saas:${{ github.ref_name }}"
+          docker push $VERSION_TAG
+        else
+          docker push ghcr.io/altinshabani1/mini-saas:latest
+        fi
 
     - name: Deploy to Remote Server
       uses: appleboy/ssh-action@v1
