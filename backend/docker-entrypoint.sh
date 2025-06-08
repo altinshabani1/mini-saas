@@ -1,10 +1,7 @@
 #!/bin/sh
 
-echo "Waiting for MongoDB to start..."
-/app/wait-for db:27017
+# Wait for PostgreSQL to be ready
+./wait-for.sh postgres:5432 -- echo "Postgres is up ✅"
 
-echo "Migrating the database..."
-npm run db:up
-
-echo "Starting the server..."
-npm start
+# Start the backend app
+exec "$@"

@@ -2,28 +2,87 @@ version: "3.8"
 
 services:
   frontend:
-    depends_on: 
-      - backend
     build: ./frontend
     ports:
-      - 3000:3000
+      - "3000:3000"
+    depends_on:
+      - backend
 
-  backend: 
-    depends_on: 
-      - db
+  backend:
     build: ./backend
-    ports: 
-      - 3001:3001
-    environment: 
-      DB_URL: mongodb://db/vidly
-    command: ./docker-entrypoint.sh
-
-  db:
-    image: mongo:4.0-xenial
+    env_file:
+      - ./backend/.env
     ports:
-      - 27017:27017
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: minisaas
+      POSTGRES_PASSWORD: 12345678
+      POSTGRES_DB: postdb
+    ports:
+      - "5432:5432"
     volumes:
-      - vidly:/data/db
+      - db_data:/var/lib/postgresql/data
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+      - frontend
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/provisioning:/etc/grafana/provisioning
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+     - /:/host:ro
+
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://minisaas:12345678@postgres-db:5432/postdb?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
 
 volumes:
-  vidly:
+  db_data:
+  prometheus_data:
+  grafana_data:

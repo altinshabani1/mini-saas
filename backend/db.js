@@ -1,15 +1,20 @@
-const mongoose = require("mongoose");
+const { Pool } = require('pg');
+require('dotenv').config();
 
-const dbUrl = process.env.DB_URL || "mongodb://localhost/vidly";
+const connectionString =
+  process.env.DATABASE_URL || "postgresql://minisaas:12345678@postgres:5432/minisaas";
 
-const connect = async () => {
-  await mongoose.connect(dbUrl, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  });
-  console.log("Connected to MongoDB: " + dbUrl);
+const pool = new Pool({ connectionString });
+
+pool.on('connect', () => {
+  console.log('✅ Connected to PostgreSQL');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ Unexpected error on idle client', err);
+  process.exit(-1);
+});
+
+module.exports = {
+  query: (text, params) => pool.query(text, params),
 };
-
-const close = () => mongoose.connection.close();
-
-module.exports = { connect, close, url: dbUrl };

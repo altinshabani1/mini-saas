@@ -1,1 +1,23 @@
+<<<<<<< HEAD
 mini-saas/
+=======
+# Node modules (ignore for backend and frontend)
+node_modules/
+
+# Environment files
+*.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+
+# Build folders
+dist/
+build/
+
+backend/node_modules/
+>>>>>>> 162b1a8cc29058d7e8ed552cc4be8943a40816b7

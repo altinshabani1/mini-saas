@@ -5,7 +5,7 @@ import api from "../services/api";
 import "./App.css";
 
 function App() {
-  const moviesEndpoint = "/movies";
+  const moviesEndpoint = "/api/movies";
   const [movies, setMovies] = useState([]);
   const [error, setError] = useState();
 
@@ -20,29 +20,38 @@ function App() {
 
   const handleAddMovie = async (title) => {
     try {
-      const movie = { _id: Date.now(), title };
-      setMovies([...movies, movie]);
+      // Create a temporary movie with a fake _id for optimistic UI
+      const tempMovie = { _id: Date.now(), title };
 
-      const { data: savedMovie } = await api.create(moviesEndpoint, movie);
+      // Add the temp movie immediately
+      setMovies((prevMovies) => [...prevMovies, tempMovie]);
 
-      setMovies([...movies, savedMovie]);
+      // Send only the title to backend (backend assigns the real _id)
+      const { data: savedMovie } = await api.create(moviesEndpoint, { title });
+
+      // Replace temp movie with saved movie from backend
+      setMovies((prevMovies) =>
+        prevMovies.map((m) => (m._id === tempMovie._id ? savedMovie : m))
+      );
     } catch (error) {
       setError("Could not save the movie!");
-      setMovies(movies);
+      // optionally, rollback state or refetch movies here
     }
   };
 
   const handleDeleteMovie = async (movie) => {
     try {
-      setMovies(movies.filter((m) => m !== movie));
-      await api.remove(moviesEndpoint + "/" + movie._id);
+      setMovies((prevMovies) => prevMovies.filter((m) => m._id !== movie._id));
+      await api.remove(`${moviesEndpoint}/${movie._id}`);
     } catch (error) {
       setError("Could not delete the movie!");
-      setMovies(movies);
+      // optionally refetch movies or revert state
     }
   };
 
-  useEffect(() => fetchMovies(), []);
+  useEffect(() => {
+    fetchMovies();
+  }, []);
 
   return (
     <div className="App">
